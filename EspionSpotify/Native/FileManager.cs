@@ -165,20 +165,24 @@ namespace EspionSpotify.Native
             var pathWithFolder = ConcatPaths(userSettings.OutputPath, ConcatPaths(artistDirectory, albumDirectory));
             var fileName = GenerateFileName(track, userSettings, _now);
             var filePath = ConcatPaths(pathWithFolder, $"{fileName}.{GetMediaFormatExtension(userSettings)}");
+
+            if (fileSystem.File.Exists(filePath))
+                return true;
+
             string foundFile = TryFindFiles(userSettings.MusicFolderPath, $"*{fileName}*", new List<string>());
             if (!string.IsNullOrEmpty(foundFile))
             {
                 try
                 {
-                    File.Copy(foundFile, filePath);
+                    File.Copy(foundFile, filePath, false);
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                 }
-                return true;
             }
-            return fileSystem.File.Exists(filePath);
+            return false;
         }
 
         public static (string, string) GetFolderPath(Track track, UserSettings userSettings)
