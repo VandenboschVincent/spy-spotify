@@ -1,13 +1,13 @@
-﻿using System;
+﻿using EspionSpotify.Enums;
+using EspionSpotify.Exceptions;
+using EspionSpotify.Extensions;
+using EspionSpotify.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Text.RegularExpressions;
-using EspionSpotify.Enums;
-using EspionSpotify.Exceptions;
-using EspionSpotify.Extensions;
-using EspionSpotify.Models;
 
 namespace EspionSpotify.Native
 {
@@ -124,12 +124,53 @@ namespace EspionSpotify.Native
             throw new NotImplementedException();
         }
 
+        private static string TryFindFiles(string path, string search, IList<string> files, int maxDepth = 4)
+        {
+            try
+            {
+                Directory.GetFiles(path, search)
+                    .ToList()
+                    .ForEach(files.Add);
+
+                //file found!
+                if (files.Any())
+                {
+                    return files[0];
+                }
+
+                //max depth reached
+                if (maxDepth <= 0)
+                    return default;
+
+                maxDepth--;
+                return Directory.GetDirectories(path)
+                    .Select(s => TryFindFiles(s, search, files, maxDepth))
+                    .OrderByDescending(s => s)
+                    .FirstOrDefault();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                // ok, so we are not allowed to dig into that directory. Move on.
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                // ok, so we are not allowed to dig into that directory. Move on.
+            }
+            return default;
+        }
+
         public bool IsPathFileNameExists(Track track, UserSettings userSettings, IFileSystem fileSystem)
         {
             var (artistDirectory, albumDirectory) = GetFolderPath(track, userSettings);
             var pathWithFolder = ConcatPaths(userSettings.OutputPath, ConcatPaths(artistDirectory, albumDirectory));
             var fileName = GenerateFileName(track, userSettings, _now);
             var filePath = ConcatPaths(pathWithFolder, $"{fileName}.{GetMediaFormatExtension(userSettings)}");
+            string foundFile = TryFindFiles(userSettings.MusicFolderPath, $"*{fileName}*", new List<string>());
+            if (!string.IsNullOrEmpty(foundFile))
+            {
+                File.Copy(foundFile, filePath);
+                return true;
+            }
             return fileSystem.File.Exists(filePath);
         }
 
@@ -141,7 +182,7 @@ namespace EspionSpotify.Native
 
             var artistDir = GetArtistDirectoryName(track, userSettings.TrackTitleSeparator, maxLength);
             var albumDir = GetAlbumDirectoryName(track, userSettings.TrackTitleSeparator, maxLength);
-            
+
             return (artistDir, albumDir);
         }
 
@@ -186,7 +227,7 @@ namespace EspionSpotify.Native
             {
                 const int numberOfSubPathsToCreate = 3; // contains artist, album, title
                 var pathShape = string.Join(@"\",
-                    new[] {userSettings.OutputPath}.Concat(new string[numberOfSubPathsToCreate]));
+                    new[] { userSettings.OutputPath }.Concat(new string[numberOfSubPathsToCreate]));
                 var maxLengthPerFolder = (MAX_PATH_LENGTH - pathShape.Length) / numberOfSubPathsToCreate;
                 return (maxLengthPerFolder, pathShape);
             }
@@ -194,7 +235,7 @@ namespace EspionSpotify.Native
             {
                 const int numberOfSubPathsToCreate = 1; // contains title
                 var pathShape = string.Join(@"\",
-                    new[] {userSettings.OutputPath}.Concat(new string[numberOfSubPathsToCreate]));
+                    new[] { userSettings.OutputPath }.Concat(new string[numberOfSubPathsToCreate]));
                 var maxLengthPerFolder = (MAX_PATH_LENGTH - pathShape.Length) / 1;
                 return (maxLengthPerFolder, pathShape);
             }
@@ -232,7 +273,7 @@ namespace EspionSpotify.Native
 
         private void CreateDirectory(string outputPath, params string[] directories)
         {
-            var path = ConcatPaths(new[] {outputPath}.Concat(directories).ToArray());
+            var path = ConcatPaths(new[] { outputPath }.Concat(directories).ToArray());
             if (_fileSystem.Directory.Exists(path)) return;
             _fileSystem.Directory.CreateDirectory(path);
         }

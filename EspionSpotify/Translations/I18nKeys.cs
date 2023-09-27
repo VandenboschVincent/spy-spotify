@@ -80,6 +80,8 @@ namespace EspionSpotify.Translations
 
         public static TranslationKeys MsgBodyPathNotFound => TranslationKeys.msgBodyPathNotFound;
         public static TranslationKeys MsgBodyPathTooLong => TranslationKeys.msgBodyPathTooLong;
+        public static TranslationKeys MsgMusicPathNotFound => TranslationKeys.msgMusicPathNotFound;
+        public static TranslationKeys MsgMusicPathTooLong => TranslationKeys.msgMusicPathTooLong;
         public static TranslationKeys MsgBodyFailedToUseSpotifyAPI => TranslationKeys.msgBodyFailedToUseSpotifyAPI;
         public static TranslationKeys MsgFolderDialog => TranslationKeys.msgFolderDialog;
         public static TranslationKeys MsgNewVersionContent => TranslationKeys.msgNewVersionContent;
@@ -87,6 +89,8 @@ namespace EspionSpotify.Translations
         public static TranslationKeys MsgTitleCantQuit => TranslationKeys.msgTitleCantQuit;
         public static TranslationKeys MsgTitlePathNotFound => TranslationKeys.msgTitlePathNotFound;
         public static TranslationKeys MsgTitlePathTooLong => TranslationKeys.msgTitlePathTooLong;
+        public static TranslationKeys MsgMusicTitlePathNotFound => TranslationKeys.msgMusicTitlePathNotFound;
+        public static TranslationKeys MsgMusicTitlePathTooLong => TranslationKeys.msgMusicTitlePathTooLong;
         public static TranslationKeys MsgTitleFailedToUseSpotifyAPI => TranslationKeys.msgTitleFailedToUseSpotifyAPI;
 
         public static TranslationKeys TabAdvanced => TranslationKeys.tabAdvanced;

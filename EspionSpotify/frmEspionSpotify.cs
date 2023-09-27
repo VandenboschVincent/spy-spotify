@@ -1,13 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Resources;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using EspionSpotify.API;
 using EspionSpotify.AudioSessions;
 using EspionSpotify.Controls;
@@ -22,6 +12,16 @@ using MetroFramework;
 using MetroFramework.Controls;
 using MetroFramework.Forms;
 using NAudio.Lame;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Resources;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using Unosquare.Swan;
 
 namespace EspionSpotify
@@ -59,6 +59,12 @@ namespace EspionSpotify
             if (string.IsNullOrEmpty(Settings.Default.settings_output_path))
             {
                 Settings.Default.settings_output_path = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+                Settings.Default.Save();
+            }
+
+            if (string.IsNullOrEmpty(Settings.Default.settings_music_output_path))
+            {
+                Settings.Default.settings_music_output_path = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
                 Settings.Default.Save();
             }
 
@@ -194,8 +200,8 @@ namespace EspionSpotify
         {
             tcMenu.SelectedIndex = Settings.Default.app_tab_number_selected;
 
-            rbMp3.Checked = Settings.Default.settings_media_audio_format == (int) MediaFormat.Mp3;
-            rbWav.Checked = Settings.Default.settings_media_audio_format == (int) MediaFormat.Wav;
+            rbMp3.Checked = Settings.Default.settings_media_audio_format == (int)MediaFormat.Mp3;
+            rbWav.Checked = Settings.Default.settings_media_audio_format == (int)MediaFormat.Wav;
             tbMinTime.Value = Settings.Default.settings_media_minimum_recorded_length_in_seconds / 5;
             tgListenToSpotifyPlayback.Checked = Settings.Default.advanced_watcher_listen_to_spotify_playback_enabled;
             tgAddSeparators.Checked = Settings.Default.advanced_file_replace_space_by_underscore_enabled;
@@ -203,10 +209,12 @@ namespace EspionSpotify
             tgCounterToFilePrefix.Checked = Settings.Default.advanced_file_counter_number_prefix_enabled;
             tgAddFolders.Checked = Settings.Default.advanced_file_group_media_in_folders_enabled;
             txtPath.Text = Settings.Default.settings_output_path;
+            txtMusicPath.Text = Settings.Default.settings_music_output_path;
             tgMuteAds.Checked = Settings.Default.settings_mute_ads_enabled;
             tgMinimizeToSystemTray.Checked = Settings.Default.settings_minimize_to_system_tray_enabled;
             tgExtraTitleToSubtitle.Checked = Settings.Default.advanced_id3_extra_title_as_subtitle_enabled;
             folderBrowserDialog.SelectedPath = Settings.Default.settings_output_path;
+            musicFolderBrowserDialog.SelectedPath = Settings.Default.settings_music_output_path;
             txtRecordingNum.Mask = Settings.Default.app_counter_number_mask;
 
             tgRecordOverRecordings.Checked = Settings.Default.advanced_record_over_recordings_enabled;
@@ -223,9 +231,9 @@ namespace EspionSpotify
 
             SetSpotifyAPIOption();
 
-            rbLastFMAPI.Checked = Settings.Default.app_selected_external_api_id == (int) ExternalAPIType.LastFM ||
+            rbLastFMAPI.Checked = Settings.Default.app_selected_external_api_id == (int)ExternalAPIType.LastFM ||
                                   !_userSettings.IsSpotifyAPISet;
-            rbSpotifyAPI.Checked = Settings.Default.app_selected_external_api_id == (int) ExternalAPIType.Spotify &&
+            rbSpotifyAPI.Checked = Settings.Default.app_selected_external_api_id == (int)ExternalAPIType.Spotify &&
                                    _userSettings.IsSpotifyAPISet;
 
             ReloadExternalAPI();
@@ -248,7 +256,7 @@ namespace EspionSpotify
             _userSettings.ListenToSpotifyPlaybackEnabled =
                 Settings.Default.advanced_watcher_listen_to_spotify_playback_enabled;
             _userSettings.GroupByFoldersEnabled = Settings.Default.advanced_file_group_media_in_folders_enabled;
-            _userSettings.MediaFormat = (MediaFormat) Settings.Default.settings_media_audio_format;
+            _userSettings.MediaFormat = (MediaFormat)Settings.Default.settings_media_audio_format;
             _userSettings.MinimumRecordedLengthSeconds =
                 Settings.Default.settings_media_minimum_recorded_length_in_seconds;
             _userSettings.OrderNumberInfrontOfFileEnabled =
@@ -258,6 +266,7 @@ namespace EspionSpotify
             _userSettings.OrderNumberInMediaTagEnabled =
                 Settings.Default.advanced_id3_counter_number_as_track_number_enabled;
             _userSettings.OutputPath = FileManager.GetCleanPath(Settings.Default.settings_output_path);
+            _userSettings.MusicFolderPath = FileManager.GetCleanPath(Settings.Default.settings_music_output_path);
             _userSettings.ForceSpotifyToSkipEnabled = Settings.Default.advanced_watcher_force_spotify_to_skip;
             _userSettings.RecordEverythingEnabled = Settings.Default.advanced_record_everything;
             _userSettings.RecordAdsEnabled = Settings.Default.advanced_record_everything_and_ads_enabled;
@@ -289,7 +298,7 @@ namespace EspionSpotify
 
         private void ReloadExternalAPI()
         {
-            if (Settings.Default.settings_media_audio_format == (int) MediaFormat.Wav)
+            if (Settings.Default.settings_media_audio_format == (int)MediaFormat.Wav)
             {
                 SetExternalAPI(ExternalAPIType.None);
                 tlpAPI.Visible = false;
@@ -300,12 +309,12 @@ namespace EspionSpotify
             tlpAPI.Visible = true;
             lblAPI.Visible = true;
             if (_userSettings.IsSpotifyAPISet &&
-                Settings.Default.app_selected_external_api_id == (int) ExternalAPIType.Spotify)
+                Settings.Default.app_selected_external_api_id == (int)ExternalAPIType.Spotify)
             {
                 SetExternalAPI(ExternalAPIType.Spotify, _userSettings.IsSpotifyAPISet);
                 return;
             }
-            
+
             SetExternalAPI(ExternalAPIType.LastFM);
         }
 
@@ -392,6 +401,7 @@ namespace EspionSpotify
             tabAdvanced.Text = Rm.GetString(I18NKeys.TabAdvanced);
 
             folderBrowserDialog.Description = Rm.GetString(I18NKeys.MsgFolderDialog);
+            musicFolderBrowserDialog.Description = Rm.GetString(I18NKeys.MsgFolderDialog);
 
             lblPath.Text = Rm.GetString(I18NKeys.LblPath);
             lblAudioDevice.Text = Rm.GetString(I18NKeys.LblAudioDevice);
@@ -478,7 +488,7 @@ namespace EspionSpotify
 
             if (isCustomBitrate && isValidPreset)
             {
-                var preset = (LAMEPreset) indexBitRate;
+                var preset = (LAMEPreset)indexBitRate;
                 if (!bitrates.ContainsKey(preset))
                 {
                     bitrates.Add(preset, preset.ToString());
@@ -628,12 +638,40 @@ namespace EspionSpotify
             return true;
         }
 
+        private bool IsMusicDirectoryNotFound()
+        {
+            if (Directory.Exists(_userSettings.MusicFolderPath)) return false;
+
+            MetroMessageBox.Show(this,
+                Rm.GetString(I18NKeys.MsgMusicPathNotFound),
+                Rm.GetString(I18NKeys.MsgMusicTitlePathNotFound),
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Question);
+
+            return true;
+        }
+
+        private bool IsMusicDirectoryPathTooLong()
+        {
+            if (!FileManager.IsOutputPathTooLong(_userSettings.MusicFolderPath)) return false;
+
+            MetroMessageBox.Show(this,
+                Rm.GetString(I18NKeys.MsgMusicPathTooLong),
+                Rm.GetString(I18NKeys.MsgMusicTitlePathTooLong),
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Question);
+
+            return true;
+        }
+
         private void LnkSpy_Click(object sender, EventArgs e)
         {
             if (!Watcher.Running)
             {
                 if (IsOutputDirectoryNotFound()) return;
                 if (IsOutputDirectoryPathTooLong()) return;
+                if (IsMusicDirectoryNotFound()) return;
+                if (IsMusicDirectoryPathTooLong()) return;
 
                 tcMenu.SelectedIndex = 0;
                 StartRecording();
@@ -703,7 +741,7 @@ namespace EspionSpotify
         private void RbFormat_CheckedChanged(object sender, EventArgs e)
         {
             var rb = sender as RadioButton;
-            var mediaFormatIndex = (int) (rbMp3.Checked ? MediaFormat.Mp3 : MediaFormat.Wav);
+            var mediaFormatIndex = (int)(rbMp3.Checked ? MediaFormat.Mp3 : MediaFormat.Wav);
             if (Settings.Default.settings_media_audio_format == mediaFormatIndex || !rb.Checked) return;
 
             var mediaFormat = rb?.Tag?.ToString().ToMediaFormat() ?? MediaFormat.Mp3;
@@ -712,7 +750,7 @@ namespace EspionSpotify
             Settings.Default.Save();
             ReloadExternalAPI();
             ReloadBitrateOptions();
-            
+
             Task.Run(async () => await _analytics.LogAction($"media-format?type={mediaFormat.ToString()}"));
         }
 
@@ -721,11 +759,11 @@ namespace EspionSpotify
             var rb = sender as RadioButton;
             var mediaTagsAPI = rbLastFMAPI.Checked ? ExternalAPIType.LastFM : ExternalAPIType.Spotify;
 
-            if (Settings.Default.app_selected_external_api_id == (int) mediaTagsAPI || !rb.Checked) return;
+            if (Settings.Default.app_selected_external_api_id == (int)mediaTagsAPI || !rb.Checked) return;
 
             var api = rb?.Tag?.ToString().ToMediaTagsAPI() ?? ExternalAPIType.LastFM;
             SetExternalAPI(api, _userSettings.IsSpotifyAPISet);
-            Settings.Default.app_selected_external_api_id = (int) mediaTagsAPI;
+            Settings.Default.app_selected_external_api_id = (int)mediaTagsAPI;
             Settings.Default.Save();
             Task.Run(async () => await _analytics.LogAction($"media-tags-api?type={api.ToString()}"));
         }
@@ -806,7 +844,7 @@ namespace EspionSpotify
                 await _analytics.LogAction(
                     $"track-title-separator?enabled={tgAddSeparators.GetPropertyThreadSafe(c => c.Checked)}"));
         }
-        
+
         private void TgAlbumTrackNumberToFilePrefix_CheckedChanged(object sender, EventArgs e)
         {
             if (Settings.Default.advanced_file_album_track_number_prefix_enabled == tgAlbumTrackNumberToFilePrefix.Checked) return;
@@ -912,6 +950,15 @@ namespace EspionSpotify
             if (folderBrowserDialog.ShowDialog() == DialogResult.OK) txtPath.Text = folderBrowserDialog.SelectedPath;
         }
 
+        private void LnkMusicPath_Click(object sender, EventArgs e)
+        {
+            musicFolderBrowserDialog.SelectedPath = string.IsNullOrEmpty(txtMusicPath.Text)
+                ? Environment.GetFolderPath(Environment.SpecialFolder.MyMusic)
+                : Path.GetDirectoryName(txtMusicPath.Text);
+
+            if (musicFolderBrowserDialog.ShowDialog() == DialogResult.OK) txtMusicPath.Text = musicFolderBrowserDialog.SelectedPath;
+        }
+
         private void TxtPath_TextChanged(object sender, EventArgs e)
         {
             var path = FileManager.GetCleanPath(txtPath.Text);
@@ -921,6 +968,17 @@ namespace EspionSpotify
             Settings.Default.settings_output_path = path;
             Settings.Default.Save();
             Task.Run(async () => await _analytics.LogAction($"set-output-folder?path={path}"));
+        }
+
+        private void TxtMusicPath_TextChanged(object sender, EventArgs e)
+        {
+            var path = FileManager.GetCleanPath(txtMusicPath.Text);
+            if (Settings.Default.settings_music_output_path == path) return;
+
+            _userSettings.MusicFolderPath = path;
+            Settings.Default.settings_music_output_path = path;
+            Settings.Default.Save();
+            Task.Run(async () => await _analytics.LogAction($"set-music-output-folder?path={path}"));
         }
 
         private void CbBitRate_SelectedIndexChanged(object sender, EventArgs e)
@@ -1036,7 +1094,7 @@ namespace EspionSpotify
 
         private void Focus_Hover(object sender, EventArgs e)
         {
-            var ctrl = (Control) sender;
+            var ctrl = (Control)sender;
             ctrl.Focus();
         }
 

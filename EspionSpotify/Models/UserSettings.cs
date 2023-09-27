@@ -1,12 +1,13 @@
-﻿using System;
-using EspionSpotify.Enums;
+﻿using EspionSpotify.Enums;
 using NAudio.Lame;
+using System;
 
 namespace EspionSpotify.Models
 {
     public class UserSettings
     {
         public string OutputPath { get; set; }
+        public string MusicFolderPath { get; set; }
         public LAMEPreset Bitrate { get; set; }
         public MediaFormat MediaFormat { get; set; }
         public int MinimumRecordedLengthSeconds { get; set; }
@@ -46,10 +47,10 @@ namespace EspionSpotify.Models
 
         public bool HasOrderNumberEnabled => OrderNumberInfrontOfFileEnabled || OrderNumberInMediaTagEnabled;
 
-        public int? OrderNumberAsTag => OrderNumberInMediaTagEnabled ? (int?) InternalOrderNumber : null;
+        public int? OrderNumberAsTag => OrderNumberInMediaTagEnabled ? (int?)InternalOrderNumber : null;
 
         public int? OrderNumberAsFile => OrderNumberInfrontOfFileEnabled
-            ? (int?) Math.Min(InternalOrderNumber, OrderNumberMax)
+            ? (int?)Math.Min(InternalOrderNumber, OrderNumberMax)
             : null;
 
         public bool IsSpotifyAPISet => !string.IsNullOrWhiteSpace(SpotifyAPIClientId) &&
