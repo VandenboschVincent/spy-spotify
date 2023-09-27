@@ -150,11 +150,11 @@ namespace EspionSpotify.Native
             }
             catch (UnauthorizedAccessException ex)
             {
-                // ok, so we are not allowed to dig into that directory. Move on.
+                Console.WriteLine(ex.Message);
             }
             catch (DirectoryNotFoundException ex)
             {
-                // ok, so we are not allowed to dig into that directory. Move on.
+                Console.WriteLine(ex.Message);
             }
             return default;
         }
@@ -168,7 +168,14 @@ namespace EspionSpotify.Native
             string foundFile = TryFindFiles(userSettings.MusicFolderPath, $"*{fileName}*", new List<string>());
             if (!string.IsNullOrEmpty(foundFile))
             {
-                File.Copy(foundFile, filePath);
+                try
+                {
+                    File.Copy(foundFile, filePath);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
                 return true;
             }
             return fileSystem.File.Exists(filePath);
