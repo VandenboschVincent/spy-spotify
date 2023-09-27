@@ -1,16 +1,16 @@
-﻿using System;
+﻿using EspionSpotify.Updater.Models.GitHub;
+using Newtonsoft.Json;
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using EspionSpotify.Updater.Models.GitHub;
-using Newtonsoft.Json;
 
 namespace EspionSpotify.Updater.Utilities
 {
     internal class GitHub
     {
-        internal const string API_LATEST_RELEASES_LINK = "https://api.github.com/repos/jwallet/spy-spotify/releases";
-        internal const string LATEST_RELEASE_LINK = "https://github.com/jwallet/spy-spotify/releases/latest";
+        internal const string API_LATEST_RELEASES_LINK = "https://api.github.com/repos/VandenboschVincent/spy-spotify/releases";
+        internal const string LATEST_RELEASE_LINK = "https://github.com/VandenboschVincent/spy-spotify/releases/latest";
 
         internal static async Task<Release[]> GetReleases()
         {

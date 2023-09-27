@@ -1,4 +1,10 @@
-﻿using System;
+﻿using EspionSpotify.Extensions;
+using EspionSpotify.Models.GitHub;
+using EspionSpotify.Properties;
+using EspionSpotify.Translations;
+using MetroFramework;
+using Newtonsoft.Json;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -7,19 +13,13 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using EspionSpotify.Extensions;
-using EspionSpotify.Models.GitHub;
-using EspionSpotify.Properties;
-using EspionSpotify.Translations;
-using MetroFramework;
-using Newtonsoft.Json;
 
 namespace EspionSpotify
 {
     internal static class GitHub
     {
         private const string API_LATEST_RELEASE_URL =
-            "https://api.github.com/repos/jwallet/spy-spotify/releases/latest";
+            "https://api.github.com/repos/VandenboschVincent/spy-spotify/releases/latest";
 
         public const string WEBSITE_FAQ_URL = "https://jwallet.github.io/spy-spotify/faq.html";
 
@@ -34,7 +34,7 @@ namespace EspionSpotify
             if (!Uri.TryCreate(API_LATEST_RELEASE_URL, UriKind.Absolute, out var uri)) return;
 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            var request = (HttpWebRequest) WebRequest.Create(uri);
+            var request = (HttpWebRequest)WebRequest.Create(uri);
             request.Method = WebRequestMethods.Http.Get;
             request.UserAgent = Constants.SPYTIFY;
 
@@ -42,7 +42,7 @@ namespace EspionSpotify
 
             try
             {
-                using (var response = (HttpWebResponse) await request.GetResponseAsync())
+                using (var response = (HttpWebResponse)await request.GetResponseAsync())
                 {
                     if (response.StatusCode != HttpStatusCode.OK) return;
 
@@ -69,7 +69,7 @@ namespace EspionSpotify
                     if (!string.IsNullOrEmpty(release.body))
                     {
                         var releaseBodySplit =
-                            release.body.Split(new[] {"\r\n", "\r", "\n"}, StringSplitOptions.None);
+                            release.body.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
                         dialogMessage =
                             $"{releaseBodySplit.TakeWhile(x => x.StartsWith("- ")).Take(5).Aggregate((current, next) => $"{current}\n{next}")}\r\n\r\n{dialogMessage}";
                     }

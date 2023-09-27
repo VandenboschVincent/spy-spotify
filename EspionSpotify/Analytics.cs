@@ -1,10 +1,10 @@
-﻿using System;
+﻿using PCLWebUtility;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using PCLWebUtility;
 
 namespace EspionSpotify
 {
@@ -48,6 +48,9 @@ namespace EspionSpotify
 
         public async Task<bool> LogAction(string action)
         {
+            //Do not log to Analytics url
+            return await Task.FromResult(true);
+
             if (LastAction.Equals(action) && DateTime.Now - LastRequest < TimeSpan.FromMinutes(5)) return false;
 
             var data = new Dictionary<string, string>
